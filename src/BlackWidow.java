@@ -18,6 +18,7 @@ public class BlackWidow {
         List<String> sectionsURL = new ArrayList<>();
         String nextPageURL;
         String nextTopicPageURL;
+        String lastPage = "1";
 
         System.out.println(getISpaces(i)+URL);
 
@@ -33,37 +34,26 @@ public class BlackWidow {
                 String text = link.html();
                 //Get topics from current section
                 try {
-                    topicsToVisit.add(regexFinder(text, "http://forum\\.android\\.com\\.pl/topic\\/(\\S)*?/"));
+                    topicsToVisit.add(regexFinder(text, "(http://forum\\.android\\.com\\.pl/topic\\/(\\S)*?/)"));
                 } catch (Exception e){ }
                 //Get subsections from current section
                 try{
-                    sectionsURL.add(regexFinder(text, "http://forum\\.android\\.com\\.pl/forum\\/(\\S)*?/"));
+                    sectionsURL.add(regexFinder(text, "(http://forum\\.android\\.com\\.pl/forum\\/(\\S)*?/)"));
                 } catch (Exception e){ }
                 try{
                     if(!htmlDocument.getElementsByClass("ipsPagination_next").hasClass("ipsPagination_inactive")){
-                        nextPageURL = regexFinder(htmlDocument.getElementsByClass("ipsPagination_next").html(), "http://forum\\.android\\.com\\.pl/forum/.*page=\\d+");
+                        nextPageURL = regexFinder(htmlDocument.getElementsByClass("ipsPagination_next").html(), "(http://forum\\.android\\.com\\.pl/forum/.*page=\\d+)");
                     }
                 } catch (Exception e){ }
 
             }
 
-            Elements nextPages = htmlDocument.getElementsByClass("ipsPagination_next");
-            for(Element nextPage:nextPages){
-                try{
-                    if(!nextPage.hasClass("ipsPagination_inactive")){
-                        nextTopicPageURL = regexFinder(htmlDocument.getElementsByClass("ipsPagination_next").html(), "http://forum\\.android\\.com\\.pl/topic/.*page=\\d+");
-                    }
-                } catch (Exception e){}
-
-            }
+            try{
+                lastPage = regexFinder(htmlDocument.toString(), "\"pageEnd\": (\\d+)");
+                System.out.println(lastPage);
+            } catch (Exception e){}
 
             boolean lastTopicPage = true;
-
-            //If topic next page available => crawl into next page
-            if(!nextTopicPageURL.equals("")){
-                //System.out.println("Crawl into next topic page");
-                topicURLs.addAll(crawl(nextTopicPageURL, i));
-            }
 
             //If last subsection page/next page not present => crawl into topic
             for(String topic:topicsToVisit){
@@ -73,11 +63,13 @@ public class BlackWidow {
             }
 
             //If subsections present => crawl into them
-            for (String sectionURL:sectionsURL) {
-                //System.out.println("Crawl into section");
-                if(!sectionsURL.equals("")){
-                    topicURLs.addAll(crawl(sectionURL, i+1));
-                    lastTopicPage = false;
+            if(nextPageURL.equals("")){
+                for (String sectionURL:sectionsURL) {
+                    //System.out.println("Crawl into section");
+                    if(!sectionsURL.equals("")){
+                        topicURLs.addAll(crawl(sectionURL, i+1));
+                        lastTopicPage = false;
+                    }
                 }
             }
 
@@ -92,10 +84,10 @@ public class BlackWidow {
                 //System.out.println("Add topic page url");
 
                 try{
-                    Elements posts = htmlDocument.getElementsByClass("cPost");
-                    for(Element e:posts){
-                        topicURLs.add(e.text());
+                    for(int page = 1;page<=Integer.parseInt(lastPage);page++){
+                        topicURLs.add(URL+"?page="+page);
                     }
+
                 }catch (Exception e){
                 }
 
@@ -119,7 +111,7 @@ public class BlackWidow {
         // Now create matcher object.
         Matcher m = r.matcher(html);
         if (m.find()) {
-            return m.group(0);
+            return m.group(1);
         } else {
             throw new Exception();
         }

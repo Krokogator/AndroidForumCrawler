@@ -1,3 +1,5 @@
+import java.util.List;
+
 public class Main {
 
     //private static String website = "http://forum.android.com.pl/";
@@ -5,6 +7,12 @@ public class Main {
 
     public static void main(String[] args) {
         BlackWidow widow = new BlackWidow();
-        System.out.println(widow.crawl(args[0], 0).size());
+        List<String> pages = widow.crawl(args[0], 0);
+
+        System.out.println("\n\n--------------------------------------------RESULTS----------------------------------------------------\n\n");
+
+        for(String page : pages){
+            System.out.println(page);
+        }
     }
 }
