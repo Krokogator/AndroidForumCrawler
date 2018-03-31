@@ -13,6 +13,7 @@ public class BlackWidow {
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/535.1 (KHTML, like Gecko) Chrome/13.0.782.112 Safari/535.1";
 
     public List<String> crawl(String URL, int i){
+        List<String> topicsToVisit = new ArrayList<>();
         List<String> topicURLs = new ArrayList<>();
         List<String> sectionsURL = new ArrayList<>();
         String nextPageURL;
@@ -32,38 +33,82 @@ public class BlackWidow {
                 String text = link.html();
                 //Get topics from current section
                 try {
-                    topicURLs.add(regexFinder(text, "http://forum\\.android\\.com\\.pl/topic\\/(\\S)*?/"));
+                    topicsToVisit.add(regexFinder(text, "http://forum\\.android\\.com\\.pl/topic\\/(\\S)*?/"));
                 } catch (Exception e){ }
                 //Get subsections from current section
                 try{
                     sectionsURL.add(regexFinder(text, "http://forum\\.android\\.com\\.pl/forum\\/(\\S)*?/"));
                 } catch (Exception e){ }
                 try{
-                    nextPageURL = regexFinder(htmlDocument.getElementsByClass("ipsPagination_next").html(), "http://forum\\.android\\.com\\.pl/forum/.*page=\\d+");
+                    if(!htmlDocument.getElementsByClass("ipsPagination_next").hasClass("ipsPagination_inactive")){
+                        nextPageURL = regexFinder(htmlDocument.getElementsByClass("ipsPagination_next").html(), "http://forum\\.android\\.com\\.pl/forum/.*page=\\d+");
+                    }
                 } catch (Exception e){ }
+
+            }
+
+            Elements nextPages = htmlDocument.getElementsByClass("ipsPagination_next");
+            for(Element nextPage:nextPages){
                 try{
-                    nextPageURL = regexFinder(htmlDocument.getElementsByClass("ipsPagination_next").html(), "http://forum\\.android\\.com\\.pl/topic/.*page=\\d+");
-                } catch (Exception e){ }
+                    if(!nextPage.hasClass("ipsPagination_inactive")){
+                        nextTopicPageURL = regexFinder(htmlDocument.getElementsByClass("ipsPagination_next").html(), "http://forum\\.android\\.com\\.pl/topic/.*page=\\d+");
+                    }
+                } catch (Exception e){}
 
             }
 
-            //Get topics from last page
-            if(!nextPageURL.equals("")){
-                topicURLs.addAll(crawl(nextPageURL, i));
+            boolean lastTopicPage = true;
+
+            //If topic next page available => crawl into next page
+            if(!nextTopicPageURL.equals("")){
+                //System.out.println("Crawl into next topic page");
+                topicURLs.addAll(crawl(nextTopicPageURL, i));
             }
 
-            //Get topics from subsections
+            //If last subsection page/next page not present => crawl into topic
+            for(String topic:topicsToVisit){
+                //System.out.println("Crawl into topic, topics: "+topicURLs.size());
+                topicURLs.addAll(crawl(topic, i+1));
+                lastTopicPage = false;
+            }
+
+            //If subsections present => crawl into them
             for (String sectionURL:sectionsURL) {
+                //System.out.println("Crawl into section");
                 if(!sectionsURL.equals("")){
                     topicURLs.addAll(crawl(sectionURL, i+1));
+                    lastTopicPage = false;
                 }
             }
 
-            if(topicURLs.isEmpty()){
-                System.out.println(regexFinder(htmlDocument.getElementsByClass("ipsPagination_last").html(), "http://forum\\.android\\.com\\.pl/topic/.*page=\\d+"));
+            //If subsections visited/not present => crawl into next subsection page
+            if(!nextPageURL.equals("")){
+                //System.out.println("Crawl into next section page");
+                topicURLs.addAll(crawl(nextPageURL, i));
+                lastTopicPage = false;
             }
+
+            if(lastTopicPage==true){
+                //System.out.println("Add topic page url");
+
+                try{
+                    Elements posts = htmlDocument.getElementsByClass("cPost");
+                    for(Element e:posts){
+                        topicURLs.add(e.text());
+                    }
+                }catch (Exception e){
+                }
+
+
+                //topicURLs.add(URL);
+            }
+
+
+
         }
-        catch (Exception e){ }
+        catch (Exception e){
+            e.printStackTrace();
+        }
         return topicURLs;
     }
 
