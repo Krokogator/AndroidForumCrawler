@@ -4,6 +4,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class HTMLParser {
@@ -11,7 +12,7 @@ public class HTMLParser {
     public List<Comment> parseComments(Document html){
         Elements rawComments = getCommentsRaw(html);
 
-
+        List<Comment> fineComments = new ArrayList<>();
                 //Title
         String title = getTitle(html);
 
@@ -34,8 +35,10 @@ public class HTMLParser {
 
             //Iid
             String id = iid + "-1";
+
+            fineComments.add(new Comment(link, id, iid, creator, content, title, date));
         }
-        return null;
+        return fineComments;
     }
 
     private Elements getCommentsRaw(Document html){

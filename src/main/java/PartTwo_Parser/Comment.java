@@ -26,4 +26,43 @@ public class Comment {
     }
 
 
+    public String getId() {
+        return id;
+    }
+
+    public String getIid() {
+        return iid;
+    }
+
+    public String getContent() {
+        return content;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getDuration_start() {
+        return duration_start;
+    }
+
+    public String getDuration_end() {
+        return duration_end;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public String getCreator() {
+        return creator;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public String getLname() {
+        return lname;
+    }
 }

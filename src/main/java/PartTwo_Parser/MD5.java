@@ -26,8 +26,9 @@ public class MD5 {
         String hex = DatatypeConverter.printHexBinary(thedigest);
 
         Long test = Long.parseLong(hex.substring(0, 14), 16);
+        String sb = 407312 + String.valueOf(test);
 
 
-        return (407312 + String.valueOf(test));
+        return (sb.substring(0, 17));
     }
 }
