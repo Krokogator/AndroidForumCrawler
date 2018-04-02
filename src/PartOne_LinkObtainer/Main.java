@@ -1,3 +1,8 @@
+package PartOne_LinkObtainer;
+
+import PartOne_LinkObtainer.BlackWidow;
+import PartOne_LinkObtainer.SaveToFile;
+
 import java.io.FileNotFoundException;
 import java.util.List;
 
