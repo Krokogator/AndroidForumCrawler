@@ -14,7 +14,7 @@
         <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-solrj</artifactId>
-            <version>7.0.0</version>
+            <version>7.2.1</version>
         </dependency>    </dependencies>
     <build>
         <resources>
