@@ -4,6 +4,7 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -81,25 +82,20 @@ public class BlackWidow {
             }
 
             if(lastTopicPage==true){
-                //System.out.println("Add topic page url");
-
                 try{
                     for(int page = 1;page<=Integer.parseInt(lastPage);page++){
                         topicURLs.add(URL+"?page="+page);
                     }
 
-                }catch (Exception e){
-                }
-
-
-                //topicURLs.add(URL);
+                }catch (Exception e){ }
             }
 
 
 
         }
         catch (Exception e){
-            e.printStackTrace();
+
+            System.out.println("Nieudane połączenie z: "+URL);
         }
         return topicURLs;
     }
@@ -123,5 +119,25 @@ public class BlackWidow {
             out+="  ";
         }
         return out;
+    }
+
+    public List<String> getSubforums(String URL) throws IOException {
+        List<String> subforums = new ArrayList<>();
+
+        Connection connection = Jsoup.connect(URL).userAgent(USER_AGENT);
+        Document htmlDocument = connection.get();
+        Elements linksOnPage = htmlDocument.getElementsByClass("ipsDataItem_title");
+
+        List<String> sectionsURL = new ArrayList<>();
+
+        for(Element e : linksOnPage) {
+            //Get subsections from current section
+            try {
+                String text = e.html();
+                subforums.add(regexFinder(text, "(http://forum\\.android\\.com\\.pl/forum\\/(\\S)*?/)"));
+            } catch (Exception ex) {
+            }
+        }
+        return subforums;
     }
 }
