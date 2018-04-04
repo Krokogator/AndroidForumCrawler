@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Main2 {
-    /**
-     *
+    /** Druga czesc skryptu
+     *  args[0] - folder z pobranymi plikami .html
      */
 
 
@@ -19,12 +19,15 @@ public class Main2 {
 
         List<Comment> comments = new ArrayList<>();
 
-        for(Document f : ob.listFilesForFolder("C:\\Users\\micha\\Desktop\\AndroidCrawler\\Downloaded\\subforum2"))
+        for(Document f : ob.listFilesForFolder(args[0]))
         {
             comments.addAll(parser.parseComments(f));
         }
 
-        for(Comment c : comments){
+        Solr solr = new Solr();
+        solr.commit(comments);
+
+        /*for(Comment c : comments){
             System.out.println("id: "+c.getId());
             System.out.println("iid: "+c.getIid());
             System.out.println("content: "+c.getContent());
@@ -35,7 +38,7 @@ public class Main2 {
             System.out.println("creator: "+c.getCreator());
             System.out.println("lang: "+c.getLang());
             System.out.println("lname: "+c.getLname());
-        }
+        }*/
     }
 
 
